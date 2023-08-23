@@ -28,29 +28,6 @@ Route::group(['middleware' => ['auth']], function () {
         'posts' => App\Http\Controllers\PostController::class,
     ]);
 
-    Route::get('/profile/setting', [
-        'uses' => 'App\Http\Controllers\ProfileController@setting',
-        'as' => 'profile.setting'
-    ]);
-
-    Route::post('/profile/updateSetting', [
-        'uses' => 'App\Http\Controllers\ProfileController@updateSetting',
-        'as' => 'profile.updateSetting'
-    ]);
-    Route::get('/profile/password', [
-        'uses' => 'App\Http\Controllers\ProfileController@password',
-        'as' => 'profile.password'
-    ]);
-
-    Route::post('/profile/updatePassword', [
-        'uses' => 'App\Http\Controllers\ProfileController@updatePassword',
-        'as' => 'profile.updatePassword'
-    ]);
-    Route::get('/profile/view', [
-        'uses' => 'App\Http\Controllers\ProfileController@view',
-        'as' => 'profile.view'
-    ]);
-
     Route::get('/apsetting', [
         'uses' => 'App\Http\Controllers\ApplicationSettingController@index',
         'as' => 'apsetting'

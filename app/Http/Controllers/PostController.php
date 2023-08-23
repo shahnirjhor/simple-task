@@ -2,18 +2,62 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
+use Carbon\Carbon;
 use App\Models\Post;
+use App\Jobs\AfterPublishPostJob;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * load constructor method
+     *
+     * @access public
+     * @return void
      */
-    public function index()
+    function __construct()
     {
+        $this->middleware('permission:post-read|post-create|post-update|post-delete', ['only' => ['index']]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @access public
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function index(Request $request)
+    {
+        dd($emails);
+        dispatch(new AfterPublishPostJob())->delay(now()->addMinutes(1));
+        dd("Email Has been delivered");
+
         $title = "All Posts";
-        return view('home', compact('title'));
+        $posts = $this->filter($request)->paginate(10)->withQueryString();
+        return view('posts.index', compact('title', 'posts'));
+    }
+
+    /**
+     * Filter user data
+     *
+     * @access private
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    private function filter(Request $request)
+    {
+        $query = Post::orderBy('id', 'DESC');
+
+        if ($request->id)
+            $query->where('id', $request->id);
+
+        if ($request->title)
+            $query->where('title', 'like', $request->title . '%');
+
+        return $query;
     }
 
     /**
@@ -21,7 +65,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        $title = "Post Create";
+        return view('posts.create', compact('title'));
     }
 
     /**
@@ -29,38 +74,42 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validation($request);
+        $roleNameArray = auth()->user()->getRoleNames();
+        $roleName = $roleNameArray['0'];
+        $roleInfo = Role::where('name', $roleName)->first();
+
+        $totalPosts = Post::where('user_id', Auth::user()->id)->whereDate('created_at', Carbon::today())->count();
+
+        if ($roleInfo->daily_post_limits == "0" || $totalPosts < $roleInfo->daily_post_limits) {
+            $data = $request->only(['title', 'description', 'schedule_type', 'schedule_time']);
+            $data['user_id'] = Auth::user()->id;
+            if ($request->schedule_time == null && $request->schedule_type == null) {
+                $data['schedule_time'] = date("Y-m-d h:i:s");
+                $data['schedule_type'] = "now";
+                $data['post_status'] = "Published";
+            }
+            Post::create($data);
+            return redirect()->route('posts.index')->with('success', trans('Post Create Successfully'));
+        } else {
+            return redirect()->route('posts.index')->with('error', trans('Daily Post Limits Is Expired'));
+        }
     }
 
     /**
-     * Display the specified resource.
+     * validation check for create & edit
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return void
      */
-    public function show(Post $post)
+    private function validation(Request $request)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post)
-    {
-        //
+        $request->validate([
+            'title' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
+            'schedule_type' => ['nullable', 'in:now,later'],
+            'schedule_time' => ['required_if:schedule_type,later']
+        ]);
     }
 }

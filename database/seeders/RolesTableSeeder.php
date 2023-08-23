@@ -19,6 +19,7 @@ class RolesTableSeeder extends Seeder
             'guard_name' => 'web',
             'is_default' => '1',
             'role_for' => '0',
+            'daily_post_limits' => '0',
         ]);
         $permissions = Permission::select('id')
             ->get()->pluck('id');
@@ -28,6 +29,7 @@ class RolesTableSeeder extends Seeder
             'name' => 'Premium',
             'guard_name' => 'web',
             'role_for' => '1',
+            'daily_post_limits' => '0',
             'is_default' => '1',
         ]);
         $premiumPermissions = Permission::select('id')
@@ -38,10 +40,10 @@ class RolesTableSeeder extends Seeder
             'name' => 'Free',
             'guard_name' => 'web',
             'role_for' => '1',
+            'daily_post_limits' => '2',
             'is_default' => '1',
         ]);
         $freePermissions = Permission::select('id')
-            ->where('name', 'not like', 'user-%')
             ->get()->pluck('id');
         $free->syncPermissions($freePermissions);
     }

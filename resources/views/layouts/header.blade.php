@@ -20,19 +20,8 @@
                     <div class="u-text">
                         <h4>{{ Auth::user()->name }}</h4>
                         <p class="text-muted" style="padding-bottom: 5px;">{{ Auth::user()->email }}</p>
-                        <a href="{{ route('profile.view') }}" class="btn btn-rounded btn-danger btn-sm">@lang('View Profile')</a>
                     </div>
                 </div>
-                <div class="dropdown-divider"></div>
-                <a href="{{ route('profile.view') }}" class="dropdown-item">
-                    <i class="fas fa-user mr-2"></i> @lang('My Profile')
-                </a>
-                <a href="{{ route('profile.setting') }}" class="dropdown-item">
-                    <i class="fas fa-cogs mr-2"></i> @lang('Account Setting')
-                </a>
-                <a href="{{ route('profile.password') }}" class="dropdown-item">
-                    <i class="fa fa-key mr-2"></i></i> @lang('Change Password')
-                </a>
                 <div class="dropdown-divider"></div>
 
                 <a href="{{ route('logout') }}" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-power-off mr-2"></i> @lang('Logout')</a>

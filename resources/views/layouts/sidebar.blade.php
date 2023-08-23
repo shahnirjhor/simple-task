@@ -41,7 +41,7 @@ $roleName = Auth::user()->getRoleNames();
                     <li class="nav-item">
                         <a href="{{ route('roles.index') }}" class="nav-link @if($c == 'roles') active @endif ">
                             <i class="fas fa-cube nav-icon"></i>
-                            <p>@lang('Role Management')</p>
+                            <p>@lang('Plan Management')</p>
                         </a>
                     </li>
                 @endcanany
